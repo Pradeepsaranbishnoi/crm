@@ -1,0 +1,111 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  role      Role     @default(SALES_REP)
+  password  String
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  leads     Lead[]   @relation("AssignedLeads")
+  createdLeads Lead[] @relation("CreatedLeads")
+  activities Activity[]
+  notes     Note[]
+}
+
+model Lead {
+  id         String    @id @default(cuid())
+  name       String
+  email      String
+  phone      String?
+  company    String?
+  status     LeadStatus @default(NEW)
+  priority   LeadPriority @default(MEDIUM)
+  value      Int?
+  source     LeadSource @default(WEBSITE)
+  assignedTo String?
+  assignee   User?      @relation("AssignedLeads", fields: [assignedTo], references: [id])
+  createdBy  String
+  creator    User       @relation("CreatedLeads", fields: [createdBy], references: [id])
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  closedAt   DateTime?
+  activities Activity[]
+  notes      Note[]
+}
+
+model Activity {
+  id         String    @id @default(cuid())
+  leadId     String
+  lead       Lead      @relation(fields: [leadId], references: [id])
+  userId     String
+  user       User      @relation(fields: [userId], references: [id])
+  type       ActivityType
+  title      String
+  description String?
+  scheduledAt DateTime?
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+}
+
+model Note {
+  id         String   @id @default(cuid())
+  leadId     String
+  lead       Lead     @relation(fields: [leadId], references: [id])
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  content    String
+  isCollaborative Boolean @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  SALES_REP
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  PROPOSAL
+  NEGOTIATION
+  CLOSED_WON
+  CLOSED_LOST
+}
+
+enum LeadPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum LeadSource {
+  WEBSITE
+  REFERRAL
+  COLD_CALL
+  EMAIL
+  SOCIAL
+  OTHER
+}
+
+enum ActivityType {
+  NOTE
+  CALL
+  EMAIL
+  MEETING
+  TASK
+}
+
+
