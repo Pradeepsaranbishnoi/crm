@@ -156,7 +156,3 @@ npm run dev
 - `cd backend && npx prisma migrate dev --name init` – apply schema locally
 - `cd backend && npm run dev` – start API locally
 
----
-
-## Screenshots
-Add screenshots of Dashboard, Leads, and Collaboration here.
